@@ -371,6 +371,7 @@ def test_get_storage_table_with_all_types(client: SqlJobClientBase) -> None:
         assert column.items() >= TABLE_UPDATE_COLUMNS_SCHEMA[name].items()
     # now get the actual schema from the db
     exists, storage_table = client.get_storage_table(table_name)
+    print('storage_table:', storage_table)
     assert exists is True
     # column order must match TABLE_UPDATE
     storage_columns = list(storage_table.values())

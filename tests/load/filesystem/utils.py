@@ -53,5 +53,6 @@ def perform_load(
     finally:
         try:
             client.drop_storage()
-        except Exception:
+        except Exception as e:
+            print(e)
             print(f"Failed to delete FILESYSTEM dataset: {client.dataset_path}")

@@ -105,7 +105,18 @@ class FilesystemClient(JobClientBase, WithStagingDataset):
 
     def drop_storage(self) -> None:
         if self.is_storage_initialized():
-            self.fs_client.rm(self.dataset_path, recursive=True)
+            import time
+            # rm has a known bug in the adfls (Azure) implementation, causing
+            # this method to sometimes fail. This leaves
+            print('self.dataset_path:', self.dataset_path)
+            try:
+                print('1')
+                self.fs_client.rm(self.dataset_path, recursive=True)
+            except Exception as e:
+                print('2', e)
+                # time.sleep(5)
+                # self.fs_client.rm(self.dataset_path, recursive=True)
+            print('3')
 
     @property
     def dataset_path(self) -> str:

@@ -4,7 +4,7 @@ import pytest
 from dlt.common.configuration import resolve_configuration
 from dlt.common.exceptions import SystemConfigurationException
 
-from dlt.destinations.impl.mssql.configuration import MsSqlCredentials, SUPPORTED_DRIVERS
+from dlt.destinations.impl.mssql.configuration import MsSqlCredentials
 
 
 def test_parse_native_representation_unsupported_driver_specified() -> None:
@@ -89,7 +89,7 @@ def test_to_odbc_dsn_arbitrary_keys_specified() -> None:
     }
 
 
-available_drivers = [d for d in pyodbc.drivers() if d in SUPPORTED_DRIVERS]
+available_drivers = [d for d in pyodbc.drivers() if d in MsSqlCredentials.SUPPORTED_DRIVERS]
 
 
 @pytest.mark.skipif(not available_drivers, reason="no supported driver available")
@@ -108,5 +108,5 @@ def test_to_odbc_dsn_driver_not_specified() -> None:
             "UID": "test_user",
             "PWD": "test_password",
         }
-        for d in SUPPORTED_DRIVERS
+        for d in MsSqlCredentials.SUPPORTED_DRIVERS
     ]
