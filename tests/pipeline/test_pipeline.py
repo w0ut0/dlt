@@ -352,7 +352,7 @@ def test_disable_enable_state_sync(environment: Any) -> None:
 
     s = DltSource(dlt.Schema("default"), "module", [dlt.resource(some_data())])
     dlt.pipeline().extract(s)
-    storage = ExtractStorage(p._normalize_storage_config)
+    storage = ExtractStorage(p._normalize_storage_config())
     assert len(storage.list_files_to_normalize_sorted()) == 1
     expect_extracted_file(storage, "default", "some_data", json.dumps([1, 2, 3]))
     with pytest.raises(FileNotFoundError):
@@ -380,7 +380,7 @@ def test_extract_multiple_sources() -> None:
     p = dlt.pipeline(destination="dummy")
     p.config.restore_from_destination = False
     p.extract([s1, s2])
-    storage = ExtractStorage(p._normalize_storage_config)
+    storage = ExtractStorage(p._normalize_storage_config())
     expect_extracted_file(storage, "default", "resource_1", json.dumps([1, 2, 3]))
     expect_extracted_file(storage, "default", "resource_2", json.dumps([3, 4, 5]))
     expect_extracted_file(storage, "default_2", "resource_3", json.dumps([6, 7, 8]))
@@ -1593,3 +1593,67 @@ def test_parallel_pipelines_async(workers: int) -> None:
     assert load_data_table_counts(pipeline_1) == {"async_table": 10}
     pipeline_2.activate()  # activate pipeline 2 to access inner duckdb
     assert load_data_table_counts(pipeline_2) == {"defer_table": 5}
+
+
+def test_resource_while_stop() -> None:
+    def product():
+        stop = False
+
+        @dlt.defer
+        def get_page(page_num):
+            nonlocal stop
+
+            # print(f"Fetching page {page_num}")
+            items = api_fetch(page_num)
+            # print(f"Retrieved {len(items)} from page {page_num}")
+
+            if len(items) == 0:
+                stop = True
+            return items
+
+        idx = 0
+        while not stop:
+            yield get_page(idx)
+            idx += 1
+
+    def api_fetch(page_num):
+        import time
+
+        time.sleep(1)
+        if page_num < 12:
+            return [{"id": page_num}]
+        else:
+            return []
+
+    pipeline = dlt.pipeline("pipeline_1", destination="duckdb", full_refresh=True)
+    load_info = pipeline.run(product())
+    assert_load_info(load_info)
+    assert pipeline.last_trace.last_normalize_info.row_counts["product"] == 12
+
+
+@pytest.mark.skip("skipped until async generators are implemented")
+def test_async_generator() -> None:
+    def async_inner_table():
+        async def _gen(idx):
+            for l_ in ["a", "b", "c"]:
+                await asyncio.sleep(1)
+                yield {"async_gen": idx, "letter": l_}
+
+        # just yield futures in a loop
+        for idx_ in range(10):
+            yield _gen(idx_)
+
+    async def async_gen_table(idx):
+        for l_ in ["a", "b", "c"]:
+            await asyncio.sleep(1)
+            yield {"async_gen": idx, "letter": l_}
+
+    @dlt.resource
+    async def async_gen_resource(idx):
+        for l_ in ["a", "b", "c"]:
+            await asyncio.sleep(1)
+            yield {"async_gen": idx, "letter": l_}
+
+    pipeline_1 = dlt.pipeline("pipeline_1", destination="duckdb", full_refresh=True)
+    pipeline_1.run(async_gen_resource(10))
+    pipeline_1.run(async_gen_table(11))

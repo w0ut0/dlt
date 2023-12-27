@@ -8,7 +8,7 @@ import os
 from dlt.common import sleep, logger
 from dlt.common.configuration import with_config, known_sections
 from dlt.common.configuration.accessors import config
-from dlt.common.pipeline import LoadInfo, SupportsPipeline, WithStepInfo
+from dlt.common.pipeline import LoadInfo, LoadMetrics, SupportsPipeline, WithStepInfo
 from dlt.common.schema.utils import get_child_tables, get_top_level_table
 from dlt.common.storages.load_storage import LoadPackageInfo, ParsedLoadJobFileName, TJobState
 from dlt.common.runners import TRunMetrics, Runnable, workermethod, NullExecutor
@@ -47,7 +47,7 @@ from dlt.load.exceptions import (
 )
 
 
-class Load(Runnable[Executor], WithStepInfo[str, LoadInfo]):
+class Load(Runnable[Executor], WithStepInfo[LoadMetrics, LoadInfo]):
     pool: Executor
 
     @with_config(spec=LoaderConfiguration, sections=(known_sections.LOAD,))
@@ -70,6 +70,7 @@ class Load(Runnable[Executor], WithStepInfo[str, LoadInfo]):
         self.staging_destination = staging_destination
         self.pool = NullExecutor()
         self.load_storage: LoadStorage = self.create_storage(is_storage_owner)
+        self._loaded_packages: List[LoadPackageInfo] = []
         super().__init__()
 
     def create_storage(self, is_storage_owner: bool) -> LoadStorage:
@@ -345,9 +346,11 @@ class Load(Runnable[Executor], WithStepInfo[str, LoadInfo]):
             with self.get_destination_client(schema) as job_client:
                 job_client.complete_load(load_id)
         self.load_storage.complete_load_package(load_id, aborted)
-        # TODO: Load must provide a clear interface to get last loads and metrics
-        # TODO: get more info ie. was package aborted, schema name etc.
-        self._step_info_complete_load_id(load_id, metrics=None)
+        # collect package info
+        self._loaded_packages.append(self.load_storage.get_load_package_info(load_id))
+        self._step_info_complete_load_id(load_id, metrics={"started_at": None, "finished_at": None})
+        # delete jobs only now
+        self.load_storage.maybe_remove_completed_jobs(load_id)
         logger.info(
             f"All jobs completed, archiving package {load_id} with aborted set to {aborted}"
         )
@@ -555,7 +558,9 @@ class Load(Runnable[Executor], WithStepInfo[str, LoadInfo]):
 
         # get top load id and mark as being processed
         with self.collector(f"Load {schema.name} in {load_id}"):
-            self._step_info_start_load_id(load_id)
+            # the same load id may be processed across multiple runs
+            if not self.current_load_id:
+                self._step_info_start_load_id(load_id)
             self.load_single_package(load_id, schema)
 
         return TRunMetrics(False, len(self.load_storage.list_normalized_packages()))
@@ -563,25 +568,23 @@ class Load(Runnable[Executor], WithStepInfo[str, LoadInfo]):
     def get_step_info(
         self,
         pipeline: SupportsPipeline,
-        started_at: datetime.datetime = None,
-        completed_at: datetime.datetime = None,
     ) -> LoadInfo:
         # TODO: LoadInfo should hold many datasets
         load_ids = list(self._load_id_metrics.keys())
-        load_packages: List[LoadPackageInfo] = []
+        metrics: Dict[str, List[LoadMetrics]] = {}
         # get load packages and dataset_name from the last package
         _dataset_name: str = None
-        for load_id in self._load_id_metrics.keys():
-            load_package = self.load_storage.get_load_package_info(load_id)
+        for load_package in self._loaded_packages:
             # TODO: each load id may have a separate dataset so construct a list of datasets here
             if isinstance(self.initial_client_config, DestinationClientDwhConfiguration):
                 _dataset_name = self.initial_client_config.normalize_dataset_name(
                     load_package.schema
                 )
-            load_packages.append(load_package)
+            metrics[load_package.load_id] = self._step_info_metrics(load_package.load_id)
 
         return LoadInfo(
             pipeline,
+            metrics,
             Destination.normalize_type(self.initial_client_config.destination_type),
             str(self.initial_client_config),
             self.initial_client_config.destination_name,
@@ -600,7 +603,6 @@ class Load(Runnable[Executor], WithStepInfo[str, LoadInfo]):
             self.initial_client_config.fingerprint(),
             _dataset_name,
             list(load_ids),
-            load_packages,
-            started_at,
+            self._loaded_packages,
             pipeline.first_run,
         )
