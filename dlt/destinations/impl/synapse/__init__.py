@@ -12,8 +12,11 @@ def capabilities() -> DestinationCapabilitiesContext:
     caps.supported_staging_file_formats = ["parquet"]
     caps.escape_identifier = escape_postgres_identifier
     caps.escape_literal = escape_mssql_literal
+
+    # Synapse has a max precision of 38: https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-azure-sql-data-warehouse?view=aps-pdw-2016-au7#DataTypes
     caps.decimal_precision = (DEFAULT_NUMERIC_PRECISION, DEFAULT_NUMERIC_SCALE)
     caps.wei_precision = (DEFAULT_NUMERIC_PRECISION, 0)
+    
     # https://learn.microsoft.com/en-us/sql/sql-server/maximum-capacity-specifications-for-sql-server?view=sql-server-ver16&redirectedfrom=MSDN
     caps.max_identifier_length = 128
     caps.max_column_identifier_length = 128
