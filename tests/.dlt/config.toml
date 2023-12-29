@@ -1,6 +1,6 @@
 # ACTIVE_DESTINATIONS = ["synapse", "mssql"]
-ACTIVE_DESTINATIONS = ["mssql"]
-# ACTIVE_DESTINATIONS = ["synapse"]
+# ACTIVE_DESTINATIONS = ["mssql"]
+ACTIVE_DESTINATIONS = ["synapse"]
 # ACTIVE_DESTINATIONS = ["filesystem"]
 # ALL_FILESYSTEM_DRIVERS = ["az"]
 

@@ -76,8 +76,7 @@ class MsSqlTypeMapper(TypeMapper):
     def from_db_type(
         self, db_type: str, precision: Optional[int], scale: Optional[int]
     ) -> TColumnType:
-        if db_type == "numeric":
-        # if db_type == "decimal":
+        if db_type == "decimal":
             if (precision, scale) == self.capabilities.wei_precision:
                 return dict(data_type="wei")
         return super().from_db_type(db_type, precision, scale)
@@ -187,4 +186,6 @@ class MsSqlClient(InsertValuesJobClient):
     def _from_db_type(
         self, pq_t: str, precision: Optional[int], scale: Optional[int]
     ) -> TColumnType:
+        # if pq_t == 'smallint':
+        #     precision = 16
         return self.type_mapper.from_db_type(pq_t, precision, scale)

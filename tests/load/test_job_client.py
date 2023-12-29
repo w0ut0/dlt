@@ -373,7 +373,6 @@ def test_get_storage_table_with_all_types(client: SqlJobClientBase) -> None:
         assert column.items() >= TABLE_UPDATE_COLUMNS_SCHEMA[name].items()
     # now get the actual schema from the db
     exists, storage_table = client.get_storage_table(table_name)
-    print('storage_table:', storage_table)
     assert exists is True
     # column order must match TABLE_UPDATE
     storage_columns = list(storage_table.values())
@@ -388,11 +387,15 @@ def test_get_storage_table_with_all_types(client: SqlJobClientBase) -> None:
             "time",
         ):
             continue
-        # if client.config.destination_type == "mssql" and c["data_type"] in ("wei", "complex"):
-        #     continue
-        # if client.config.destination_type == "synapse" and c["data_type"] in ("wei", "complex"):
-        #     continue        
+        # mssql and synapse have no native data type for the complex type.
+        if client.config.destination_type in ("mssql", "synapse") and c["data_type"] in ("complex"):
+            continue
         assert c["data_type"] == expected_c["data_type"]
+        # NEW TEST FOR PRECISION.
+        if "precision" in c:
+            print(c, '<-- sct, precision specified in bits')
+            print(expected_c, '<-- dbt, precision specified in number of digits')
+            assert c["precision"] == expected_c["precision"]
 
 
 @pytest.mark.parametrize(
