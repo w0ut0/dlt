@@ -38,7 +38,10 @@ class InsertValuesLoadJob(LoadJob, FollowupJob):
             header = f.readline()
             values_mark = f.readline()
             # properly formatted file has a values marker at the beginning
-            assert values_mark == "VALUES\n"
+            if self._sql_client.capabilities.insert_values_writer_type == "default":
+                assert values_mark == "VALUES\n"
+            elif self._sql_client.capabilities.insert_values_writer_type == "select_union":
+                assert values_mark.startswith("SELECT")
 
             max_rows = self._sql_client.capabilities.max_rows_per_insert
 

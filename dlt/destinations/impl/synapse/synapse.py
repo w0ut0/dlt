@@ -1,9 +1,10 @@
-from typing import ClassVar, Sequence, List
+from typing import ClassVar, Sequence, List, Dict
+from copy import deepcopy
 
 from dlt.common.destination import DestinationCapabilitiesContext
 from dlt.common.destination.reference import SupportsStagingDestination
 
-from dlt.common.schema import TColumnSchema, Schema
+from dlt.common.schema import TColumnSchema, Schema, TColumnHint
 from dlt.common.schema.typing import TTableSchemaColumns
 
 from dlt.destinations.insert_job_client import InsertValuesJobClient
@@ -16,6 +17,9 @@ from dlt.destinations.impl.synapse.sql_client import SynapseSqlClient
 from dlt.destinations.impl.synapse.configuration import SynapseClientConfiguration
 
 
+HINT_TO_SYNAPSE_ATTR: Dict[TColumnHint, str] = {"unique": "UNIQUE NOT ENFORCED"}
+
+
 class SynapseClient(MsSqlClient, SupportsStagingDestination):
     capabilities: ClassVar[DestinationCapabilitiesContext] = capabilities()
 
@@ -24,8 +28,11 @@ class SynapseClient(MsSqlClient, SupportsStagingDestination):
         InsertValuesJobClient.__init__(self, schema, config, sql_client)
         self.config: SynapseClientConfiguration = config
         self.sql_client = sql_client
-        self.active_hints = HINT_TO_MSSQL_ATTR if self.config.create_indexes else {}
         self.type_mapper = MsSqlTypeMapper(self.capabilities)
+
+        self.active_hints = deepcopy(HINT_TO_SYNAPSE_ATTR)
+        if not self.config.create_unique_indexes:
+            self.active_hints.pop('unique', None)
 
     def _get_table_update_sql(
         self, table_name: str, new_columns: Sequence[TColumnSchema], generate_alter: bool

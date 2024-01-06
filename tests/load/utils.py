@@ -465,8 +465,7 @@ def yield_client_with_storage(
     ) as client:
         client.initialize_storage()
         yield client
-        # print(dataset_name)
-        # client.sql_client.drop_dataset()
+        client.sql_client.drop_dataset()
         if isinstance(client, WithStagingDataset):
             with client.with_staging_dataset():
                 if client.is_storage_initialized():

@@ -1,8 +1,11 @@
-# ACTIVE_DESTINATIONS = ["synapse", "mssql"]
+ACTIVE_DESTINATIONS = ["synapse", "mssql"]
 # ACTIVE_DESTINATIONS = ["mssql"]
-ACTIVE_DESTINATIONS = ["synapse"]
+# ACTIVE_DESTINATIONS = ["synapse"]
 # ACTIVE_DESTINATIONS = ["filesystem"]
 # ALL_FILESYSTEM_DRIVERS = ["az"]
+
+[destination.mssql]
+create_indexes = false
 
 [destination.mssql.credentials]
 database = "dlt_data"
@@ -10,6 +13,9 @@ username = "loader"
 host = "localhost"
 port = 1433
 driver = "ODBC Driver 17 for SQL Server"
+
+[destination.synapse]
+create_unique_indexes = false
 
 [destination.synapse.credentials]
 database = "minipool"

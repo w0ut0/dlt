@@ -1,13 +1,19 @@
+from typing import ClassVar
 from contextlib import suppress
+
+from dlt.common.destination import DestinationCapabilitiesContext
 
 from dlt.destinations.impl.mssql.sql_client import PyOdbcMsSqlClient
 from dlt.destinations.impl.mssql.configuration import MsSqlCredentials
+from dlt.destinations.impl.synapse import capabilities
 from dlt.destinations.impl.synapse.configuration import SynapseCredentials
 
 from dlt.destinations.exceptions import DatabaseUndefinedRelation
 
 
 class SynapseSqlClient(PyOdbcMsSqlClient):
+    capabilities: ClassVar[DestinationCapabilitiesContext] = capabilities()
+
     def drop_tables(self, *tables: str) -> None:
         if not tables:
             return

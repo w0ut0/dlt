@@ -6,10 +6,14 @@ from dlt.common.wei import EVM_DECIMAL_PRECISION
 
 def capabilities() -> DestinationCapabilitiesContext:
     caps = DestinationCapabilitiesContext()
+
     caps.preferred_loader_file_format = "insert_values"
     caps.supported_loader_file_formats = ["insert_values"]
     caps.preferred_staging_file_format = "parquet"
     caps.supported_staging_file_formats = ["parquet"]
+
+    caps.insert_values_writer_type = "select_union"
+
     caps.escape_identifier = escape_postgres_identifier
     caps.escape_literal = escape_mssql_literal
 
