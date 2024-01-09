@@ -12,7 +12,7 @@ def capabilities() -> DestinationCapabilitiesContext:
     caps.preferred_staging_file_format = "parquet"
     caps.supported_staging_file_formats = ["parquet"]
 
-    caps.insert_values_writer_type = "select_union"
+    caps.insert_values_writer_type = "select_union" # https://stackoverflow.com/a/77014299
 
     caps.escape_identifier = escape_postgres_identifier
     caps.escape_literal = escape_mssql_literal
@@ -28,8 +28,8 @@ def capabilities() -> DestinationCapabilitiesContext:
     caps.is_max_query_length_in_bytes = True
     caps.max_text_data_type_length = 2**30 - 1
     caps.is_max_text_data_type_length_in_bytes = False
+    caps.supports_transactions = True
     caps.supports_ddl_transactions = False # https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-develop-transactions#limitations
-    caps.max_rows_per_insert = 1000
     caps.timestamp_precision = 7
 
     return caps

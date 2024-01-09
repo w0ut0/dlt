@@ -39,7 +39,7 @@ def drop_active_pipeline_data() -> None:
         def _drop_dataset(schema_name: str) -> None:
             with p.destination_client(schema_name) as client:
                 try:
-                    # client.drop_storage()
+                    client.drop_storage()
                     print("dropped")
                 except Exception as exc:
                     print(exc)
