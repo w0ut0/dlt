@@ -1,8 +1,9 @@
-Execute the following SQL statements to set up the `loader` user:
+# Set up loader user
+Execute the following SQL statements to set up the [loader](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql/data-loading-best-practices#create-a-loading-user) user:
 ```sql
 -- on master database
 
-CREATE LOGIN loader WITH PASSWORD = 'YOUR_PASSWORD_HERE';
+CREATE LOGIN loader WITH PASSWORD = 'YOUR_LOADER_PASSWORD_HERE';
 ```
 
 ```sql
@@ -18,4 +19,45 @@ GRANT CREATE VIEW ON DATABASE :: minipool TO loader;
 GRANT SELECT ON DATABASE :: minipool TO loader;
 GRANT INSERT ON DATABASE :: minipool TO loader;
 GRANT ADMINISTER DATABASE BULK OPERATIONS TO loader;
+```
+
+```sql
+-- https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-workload-isolation
+
+CREATE WORKLOAD GROUP DataLoads
+WITH ( 
+    MIN_PERCENTAGE_RESOURCE = 0
+    ,CAP_PERCENTAGE_RESOURCE = 50
+    ,REQUEST_MIN_RESOURCE_GRANT_PERCENT = 25
+);
+
+CREATE WORKLOAD CLASSIFIER [wgcELTLogin]
+WITH (
+    WORKLOAD_GROUP = 'DataLoads'
+    ,MEMBERNAME = 'loader'
+);
+```
+
+# config.toml
+```toml
+[load]
+# Synapse does not handle concurrency well in all situations
+# for example, the test tests/load/pipeline/test_replace_disposition.py::test_replace_table_clearing[staging-optimized-synapse-no-staging] makes Synapse suspend queries and hang when workers > 1
+workers = 1
+
+[destination.synapse]
+create_unique_indexes = false
+
+[destination.synapse.credentials]
+database = "minipool"
+username = "loader"
+host = "dlt-synapse-ci.sql.azuresynapse.net"
+port = 1433
+driver = "ODBC Driver 18 for SQL Server"
+```
+
+# secrets.toml
+```toml
+[destination.synapse.credentials]
+password = "YOUR_LOADER_PASSWORD_HERE"
 ```

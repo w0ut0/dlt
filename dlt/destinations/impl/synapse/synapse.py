@@ -1,12 +1,14 @@
-from typing import ClassVar, Sequence, List, Dict
+from typing import ClassVar, Sequence, List, Dict, Any, Optional 
 from copy import deepcopy
 
 from dlt.common.destination import DestinationCapabilitiesContext
-from dlt.common.destination.reference import SupportsStagingDestination
+from dlt.common.destination.reference import SupportsStagingDestination, NewLoadJob
 
-from dlt.common.schema import TColumnSchema, Schema, TColumnHint
+from dlt.common.schema import TTableSchema, TColumnSchema, Schema, TColumnHint
 from dlt.common.schema.typing import TTableSchemaColumns
 
+from dlt.destinations.sql_jobs import SqlStagingCopyJob, SqlJobParams
+from dlt.destinations.sql_client import SqlClientBase
 from dlt.destinations.insert_job_client import InsertValuesJobClient
 from dlt.destinations.job_client_impl import SqlJobClientBase
 
@@ -50,5 +52,41 @@ class SynapseClient(MsSqlClient, SupportsStagingDestination):
         else:
             sql_result = _sql_result
         return sql_result
+    
+    def _create_replace_followup_jobs(
+        self, table_chain: Sequence[TTableSchema]
+    ) -> List[NewLoadJob]:
+        if self.config.replace_strategy == "staging-optimized":
+            return [SynapseStagingCopyJob.from_table_chain(table_chain, self.sql_client)]
+        return super()._create_replace_followup_jobs(table_chain)    
+    
 
-
+class SynapseStagingCopyJob(SqlStagingCopyJob):
+    @classmethod
+    def generate_sql(
+        cls,
+        table_chain: Sequence[TTableSchema],
+        sql_client: SqlClientBase[Any],
+        params: Optional[SqlJobParams] = None,
+    ) -> List[str]:
+        sql: List[str] = []
+        for table in table_chain:
+            with sql_client.with_staging_dataset(staging=True):
+                staging_table_name = sql_client.make_qualified_table_name(table["name"])
+            table_name = sql_client.make_qualified_table_name(table["name"])
+            # drop destination table
+            sql.append(f"DROP TABLE {table_name};")
+            # moving staging table to destination schema
+            sql.append(
+                f"ALTER SCHEMA {sql_client.fully_qualified_dataset_name()} TRANSFER"
+                f" {staging_table_name};"
+            )
+            # recreate staging table
+            sql.append(
+                f"CREATE TABLE {staging_table_name}"
+                " WITH ( DISTRIBUTION = ROUND_ROBIN, HEAP )" # distribution must be explicitly specified with CTAS
+                f" AS SELECT * FROM {table_name}"
+                " WHERE 1 = 0;" # no data, table structure only
+            )
+            
+        return sql    
