@@ -24,23 +24,7 @@ class SynapseSqlClient(PyOdbcMsSqlClient):
         ]
         with suppress(DatabaseUndefinedRelation):
             self.execute_fragments(statements)        
-        
 
-    def drop_dataset(self) -> None:
-        # MS Sql doesn't support DROP ... CASCADE, drop tables in the schema first
-        # Drop all views
-        rows = self.execute_sql(
-            "SELECT table_name FROM information_schema.views WHERE table_schema = %s;",
-            self.dataset_name,
-        )
-        view_names = [row[0] for row in rows]
-        self._drop_views(*view_names)
-        # Drop all tables
-        rows = self.execute_sql(
-            "SELECT table_name FROM information_schema.tables WHERE table_schema = %s;",
-            self.dataset_name,
-        )
-        table_names = [row[0] for row in rows]
-        self.drop_tables(*table_names)
-
+    def _drop_schema(self) -> None:
+        # Synapse does not support DROP SCHEMA IF EXISTS.
         self.execute_sql("DROP SCHEMA %s;" % self.fully_qualified_dataset_name())

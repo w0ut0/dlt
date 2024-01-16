@@ -4,10 +4,11 @@ import sqlfluff
 from dlt.common.utils import uniq_id
 from dlt.common.schema import Schema
 
-pytest.importorskip("dlt.destinations.impl.mssql.mssql", reason="MSSQL ODBC driver not installed")
-
-from dlt.destinations.impl.mssql.mssql import MsSqlClient
-from dlt.destinations.impl.mssql.configuration import MsSqlClientConfiguration, MsSqlCredentials
+from dlt.destinations.impl.synapse.synapse import SynapseClient
+from dlt.destinations.impl.synapse.configuration import (
+    SynapseClientConfiguration,
+    SynapseCredentials
+)
 
 from tests.load.utils import TABLE_UPDATE
 
@@ -18,28 +19,28 @@ def schema() -> Schema:
 
 
 @pytest.fixture
-def client(schema: Schema) -> MsSqlClient:
+def client(schema: Schema) -> SynapseClient:
     # return client without opening connection
-    return MsSqlClient(
+    return SynapseClient(
         schema,
-        MsSqlClientConfiguration(dataset_name="test_" + uniq_id(), credentials=MsSqlCredentials()),
+        SynapseClientConfiguration(
+            dataset_name="test_" + uniq_id(), credentials=SynapseCredentials()
+        ),
     )
 
 
-def test_create_table(client: MsSqlClient) -> None:
+def test_create_table(client: SynapseClient) -> None:
     # non existing table
     sql = client._get_table_update_sql("event_test_table", TABLE_UPDATE, False)[0]
-    print('PRE:', sql)
     sqlfluff.parse(sql, dialect="tsql")
-    print('POST:', sql)
     assert "event_test_table" in sql
     assert '"col1" bigint  NOT NULL' in sql
     assert '"col2" float  NOT NULL' in sql
     assert '"col3" bit  NOT NULL' in sql
     assert '"col4" datetimeoffset  NOT NULL' in sql
-    assert '"col5" nvarchar' in sql
+    assert '"col5" nvarchar(max)  NOT NULL' in sql
     assert '"col6" decimal(38,9)  NOT NULL' in sql
-    assert '"col7" varbinary' in sql
+    assert '"col7" varbinary(max)  NOT NULL' in sql
     assert '"col8" decimal(38,0)' in sql
     assert '"col9" nvarchar(max)  NOT NULL' in sql
     assert '"col10" date  NOT NULL' in sql
@@ -50,9 +51,10 @@ def test_create_table(client: MsSqlClient) -> None:
     assert '"col6_precision" decimal(6,2)  NOT NULL' in sql
     assert '"col7_precision" varbinary(19)' in sql
     assert '"col11_precision" time(3)  NOT NULL' in sql
+    assert 'WITH ( HEAP )' in sql
 
 
-def test_alter_table(client: MsSqlClient) -> None:
+def test_alter_table(client: SynapseClient) -> None:
     # existing table has no columns
     sql = client._get_table_update_sql("event_test_table", TABLE_UPDATE, True)[0]
     sqlfluff.parse(sql, dialect="tsql")
@@ -63,9 +65,9 @@ def test_alter_table(client: MsSqlClient) -> None:
     assert '"col2" float  NOT NULL' in sql
     assert '"col3" bit  NOT NULL' in sql
     assert '"col4" datetimeoffset  NOT NULL' in sql
-    assert '"col5" nvarchar' in sql
+    assert '"col5" nvarchar(max)  NOT NULL' in sql
     assert '"col6" decimal(38,9)  NOT NULL' in sql
-    assert '"col7" varbinary' in sql
+    assert '"col7" varbinary(max)  NOT NULL' in sql
     assert '"col8" decimal(38,0)' in sql
     assert '"col9" nvarchar(max)  NOT NULL' in sql
     assert '"col10" date  NOT NULL' in sql
@@ -76,3 +78,4 @@ def test_alter_table(client: MsSqlClient) -> None:
     assert '"col6_precision" decimal(6,2)  NOT NULL' in sql
     assert '"col7_precision" varbinary(19)' in sql
     assert '"col11_precision" time(3)  NOT NULL' in sql
+    assert 'WITH ( HEAP )' not in sql
