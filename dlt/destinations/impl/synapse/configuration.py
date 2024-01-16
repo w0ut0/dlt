@@ -11,6 +11,8 @@ from dlt.destinations.impl.mssql.configuration import MsSqlCredentials
 
 @configspec
 class SynapseCredentials(MsSqlCredentials):
+    drivername: Final[str] = "synapse"  # type: ignore
+
     # LongAsMax keyword got introduced in ODBC Driver 18 for SQL Server.
     SUPPORTED_DRIVERS: ClassVar[str] = ["ODBC Driver 18 for SQL Server"]
 
