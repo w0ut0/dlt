@@ -98,7 +98,9 @@ def escape_mssql_literal(v: Any) -> Any:
             json.dumps(v), prefix="N'", escape_dict=MS_SQL_ESCAPE_DICT, escape_re=MS_SQL_ESCAPE_RE
         )
     if isinstance(v, bytes):
-        return f"CONVERT(VARBINARY(MAX), '{v.hex()}', 2)"
+        # Use 8000 instead of MAX because using MAX results in an error for
+        # VARBINARY columns with specified length.
+        return f"CONVERT(VARBINARY(8000), '{v.hex()}', 2)"
     if isinstance(v, bool):
         return str(int(v))
     if v is None:

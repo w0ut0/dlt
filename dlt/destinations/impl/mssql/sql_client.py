@@ -130,7 +130,6 @@ class PyOdbcMsSqlClient(SqlClientBase[pyodbc.Connection], DBTransaction):
     @contextmanager
     @raise_database_error
     def execute_query(self, query: AnyStr, *args: Any, **kwargs: Any) -> Iterator[DBApiCursor]:
-        print('query:', query)
         assert isinstance(query, str)
         curr: DBApiCursor = None
         if kwargs:

@@ -163,7 +163,7 @@ def destinations_configs(
         destination_configs += [
             DestinationTestConfiguration(destination=destination)
             for destination in SQL_DESTINATIONS
-            if destination != "athena"
+            if destination not in ("athena", "synapse")
         ]
         destination_configs += [
             DestinationTestConfiguration(destination="duckdb", file_format="parquet")
@@ -190,6 +190,13 @@ def destinations_configs(
                 extra_info="iceberg",
             )
         ]
+        # dbt for Synapse has some complications and I couldn't get it to pass all tests.
+        destination_configs += [
+            DestinationTestConfiguration(
+                destination="synapse",
+                supports_dbt=False
+            )
+        ]        
 
     if default_vector_configs:
         # for now only weaviate

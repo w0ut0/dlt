@@ -1,8 +1,11 @@
-ACTIVE_DESTINATIONS = ["synapse", "mssql"]
+# ACTIVE_DESTINATIONS = ["synapse", "mssql"]
 # ACTIVE_DESTINATIONS = ["mssql"]
-# ACTIVE_DESTINATIONS = ["synapse"]
+ACTIVE_DESTINATIONS = ["synapse"]
 # ACTIVE_DESTINATIONS = ["filesystem"]
 # ALL_FILESYSTEM_DRIVERS = ["az"]
+
+[load]
+workers = 1
 
 [destination.mssql]
 create_indexes = false
