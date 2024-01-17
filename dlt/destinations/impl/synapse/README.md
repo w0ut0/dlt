@@ -40,20 +40,15 @@ WITH (
 
 # config.toml
 ```toml
-[load]
-# Synapse does not handle concurrency well in all situations
-# for example, the test tests/load/pipeline/test_replace_disposition.py::test_replace_table_clearing[staging-optimized-synapse-no-staging] makes Synapse suspend queries and hang when workers > 1
-workers = 1
-
-[destination.synapse]
-create_unique_indexes = false
-
 [destination.synapse.credentials]
 database = "minipool"
 username = "loader"
 host = "dlt-synapse-ci.sql.azuresynapse.net"
 port = 1433
 driver = "ODBC Driver 18 for SQL Server"
+
+[destination.synapse]
+create_indexes = false
 ```
 
 # secrets.toml
