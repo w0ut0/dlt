@@ -11,7 +11,7 @@ from dlt.destinations.impl.synapse.configuration import (
 
 def test_synapse_configuration() -> None:
     # By default, unique indexes should not be created.
-    assert SynapseClientConfiguration().create_unique_indexes == False
+    assert SynapseClientConfiguration().create_indexes is False
 
 
 def test_parse_native_representation() -> None:
@@ -20,8 +20,8 @@ def test_parse_native_representation() -> None:
         resolve_configuration(
             SynapseCredentials(
                 "synapse://test_user:test_pwd@test.sql.azuresynapse.net/test_db?DRIVER=ODBC+Driver+17+for+SQL+Server"
-            )      
-        )              
+            )
+        )
 
 
 def test_to_odbc_dsn_longasmax() -> None:

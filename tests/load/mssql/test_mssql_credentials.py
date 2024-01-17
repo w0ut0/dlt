@@ -1,10 +1,7 @@
 import pyodbc
 import pytest
 
-from dlt.common.configuration import (
-    resolve_configuration,
-    ConfigFieldMissingException
-)
+from dlt.common.configuration import resolve_configuration, ConfigFieldMissingException
 from dlt.common.exceptions import SystemConfigurationException
 
 from dlt.destinations.impl.mssql.configuration import MsSqlCredentials
@@ -34,7 +31,7 @@ def test_parse_native_representation() -> None:
             MsSqlCredentials(
                 "mssql://test_user@sql.example.com/test_db?DRIVER=ODBC+Driver+18+for+SQL+Server"
             )
-        )        
+        )
 
 
 def test_to_odbc_dsn_supported_driver_specified() -> None:
@@ -84,7 +81,7 @@ def test_to_odbc_dsn_supported_driver_specified() -> None:
         "DATABASE": "test_db",
         "UID": "test_user",
         "PWD": "test_pwd",
-    }    
+    }
 
 
 def test_to_odbc_dsn_arbitrary_keys_specified() -> None:

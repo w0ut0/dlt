@@ -12,7 +12,7 @@ def capabilities() -> DestinationCapabilitiesContext:
     caps.preferred_staging_file_format = None
     caps.supported_staging_file_formats = []
 
-    caps.insert_values_writer_type = "select_union" # https://stackoverflow.com/a/77014299
+    caps.insert_values_writer_type = "select_union"  # https://stackoverflow.com/a/77014299
 
     caps.escape_identifier = escape_postgres_identifier
     caps.escape_literal = escape_mssql_literal
@@ -21,24 +21,24 @@ def capabilities() -> DestinationCapabilitiesContext:
     # https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-azure-sql-data-warehouse?view=aps-pdw-2016-au7#DataTypes
     caps.decimal_precision = (DEFAULT_NUMERIC_PRECISION, DEFAULT_NUMERIC_SCALE)
     caps.wei_precision = (DEFAULT_NUMERIC_PRECISION, 0)
-    
+
     # https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-azure-sql-data-warehouse?view=aps-pdw-2016-au7#LimitationsRestrictions
     caps.max_identifier_length = 128
     caps.max_column_identifier_length = 128
-    
+
     # https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-service-capacity-limits#queries
     caps.max_query_length = 65536 * 4096
     caps.is_max_query_length_in_bytes = True
 
     # nvarchar(max) can store 2 GB
     # https://learn.microsoft.com/en-us/sql/t-sql/data-types/nchar-and-nvarchar-transact-sql?view=sql-server-ver16#nvarchar---n--max--
-    caps.max_text_data_type_length =  2 * 1024 * 1024 * 1024
+    caps.max_text_data_type_length = 2 * 1024 * 1024 * 1024
     caps.is_max_text_data_type_length_in_bytes = True
 
     # https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-develop-transactions
     caps.supports_transactions = True
     caps.supports_ddl_transactions = False
-    
+
     # datetimeoffset can store 7 digits for fractional seconds
     # https://learn.microsoft.com/en-us/sql/t-sql/data-types/datetimeoffset-transact-sql?view=sql-server-ver16
     caps.timestamp_precision = 7

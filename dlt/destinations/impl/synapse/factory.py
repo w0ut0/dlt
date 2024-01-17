@@ -16,7 +16,7 @@ class synapse(Destination[SynapseClientConfiguration, "SynapseClient"]):
     spec = SynapseClientConfiguration
 
     def capabilities(self) -> DestinationCapabilitiesContext:
-        return capabilities()    
+        return capabilities()
 
     @property
     def client_class(self) -> t.Type["SynapseClient"]:
@@ -32,6 +32,16 @@ class synapse(Destination[SynapseClientConfiguration, "SynapseClient"]):
         environment: t.Optional[str] = None,
         **kwargs: t.Any,
     ) -> None:
+        """Configure the Synapse destination to use in a pipeline.
+
+        All arguments provided here supersede other configuration sources such as environment variables and dlt config files.
+
+        Args:
+            credentials: Credentials to connect to the Synapse dedicated pool. Can be an instance of `SynapseCredentials` or
+                a connection string in the format `synapse://user:password@host:port/database`
+            create_indexes: Should unique indexes be created, defaults to False
+            **kwargs: Additional arguments passed to the destination config
+        """
         super().__init__(
             credentials=credentials,
             create_indexes=create_indexes,

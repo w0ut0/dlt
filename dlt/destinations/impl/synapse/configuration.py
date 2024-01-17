@@ -1,4 +1,4 @@
-from typing import Final, Any, Optional, ClassVar
+from typing import Final, Any, List, Dict, Optional, ClassVar
 
 from dlt.common.configuration import configspec
 
@@ -14,13 +14,13 @@ class SynapseCredentials(MsSqlCredentials):
     drivername: Final[str] = "synapse"  # type: ignore
 
     # LongAsMax keyword got introduced in ODBC Driver 18 for SQL Server.
-    SUPPORTED_DRIVERS: ClassVar[str] = ["ODBC Driver 18 for SQL Server"]
+    SUPPORTED_DRIVERS: ClassVar[List[str]] = ["ODBC Driver 18 for SQL Server"]
 
-    def _get_odbc_dsn_dict(self) -> dict:
+    def _get_odbc_dsn_dict(self) -> Dict[str, Any]:
         params = super()._get_odbc_dsn_dict()
         # Long types (text, ntext, image) are not supported on Synapse.
         # Convert to max types using LongAsMax keyword.
-        # https://stackoverflow.com/a/57926224 
+        # https://stackoverflow.com/a/57926224
         params["LONGASMAX"] = "yes"
         return params
 

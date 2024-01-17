@@ -1,4 +1,4 @@
-from typing import Final, ClassVar, Any, List, Optional, TYPE_CHECKING
+from typing import Final, ClassVar, Any, List, Dict, Optional, TYPE_CHECKING
 from sqlalchemy.engine import URL
 
 from dlt.common.configuration import configspec
@@ -21,7 +21,10 @@ class MsSqlCredentials(ConnectionStringCredentials):
 
     __config_gen_annotations__: ClassVar[List[str]] = ["port", "connect_timeout"]
 
-    SUPPORTED_DRIVERS: ClassVar[str] = ["ODBC Driver 18 for SQL Server", "ODBC Driver 17 for SQL Server"]
+    SUPPORTED_DRIVERS: ClassVar[List[str]] = [
+        "ODBC Driver 18 for SQL Server",
+        "ODBC Driver 17 for SQL Server",
+    ]
 
     def parse_native_representation(self, native_value: Any) -> None:
         # TODO: Support ODBC connection string or sqlalchemy URL
@@ -67,14 +70,14 @@ class MsSqlCredentials(ConnectionStringCredentials):
             f"No supported ODBC driver found for MS SQL Server.  See {docs_url} for information on"
             f" how to install the '{self.SUPPORTED_DRIVERS[0]}' on your platform."
         )
-    
-    def _get_odbc_dsn_dict(self) -> dict:
+
+    def _get_odbc_dsn_dict(self) -> Dict[str, Any]:
         params = {
             "DRIVER": self.driver,
             "SERVER": f"{self.host},{self.port}",
             "DATABASE": self.database,
             "UID": self.username,
-            "PWD": self.password
+            "PWD": self.password,
         }
         if self.query is not None:
             params.update({k.upper(): v for k, v in self.query.items()})

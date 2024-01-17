@@ -29,9 +29,7 @@ def client(schema: Schema) -> MsSqlClient:
 def test_create_table(client: MsSqlClient) -> None:
     # non existing table
     sql = client._get_table_update_sql("event_test_table", TABLE_UPDATE, False)[0]
-    print('PRE:', sql)
     sqlfluff.parse(sql, dialect="tsql")
-    print('POST:', sql)
     assert "event_test_table" in sql
     assert '"col1" bigint  NOT NULL' in sql
     assert '"col2" float  NOT NULL' in sql

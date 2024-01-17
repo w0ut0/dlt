@@ -70,7 +70,7 @@ class InsertValuesLoadJob(LoadJob, FollowupJob):
                         processed += len(chunk)
                         insert_sql.append(header.format(qualified_table_name))
                         if self._sql_client.capabilities.insert_values_writer_type == "default":
-                            insert_sql.append(values_mark)                        
+                            insert_sql.append(values_mark)
                         if processed == len_rows:
                             # On the last chunk we need to add the extra row read
                             insert_sql.append("".join(chunk) + until_nl)
@@ -80,9 +80,11 @@ class InsertValuesLoadJob(LoadJob, FollowupJob):
                 else:
                     # otherwise write all content in a single INSERT INTO
                     if self._sql_client.capabilities.insert_values_writer_type == "default":
-                        insert_sql.extend([header.format(qualified_table_name), values_mark, content])
+                        insert_sql.extend(
+                            [header.format(qualified_table_name), values_mark, content]
+                        )
                     elif self._sql_client.capabilities.insert_values_writer_type == "select_union":
-                        insert_sql.extend([header.format(qualified_table_name), content])                  
+                        insert_sql.extend([header.format(qualified_table_name), content])
 
                     if until_nl:
                         insert_sql.append(until_nl)

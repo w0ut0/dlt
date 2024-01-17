@@ -1,4 +1,4 @@
-from typing import ClassVar, Sequence, List, Dict, Any, Optional 
+from typing import ClassVar, Sequence, List, Dict, Any, Optional
 from copy import deepcopy
 
 from dlt.common.destination import DestinationCapabilitiesContext
@@ -21,14 +21,14 @@ from dlt.destinations.impl.synapse.configuration import SynapseClientConfigurati
 
 HINT_TO_SYNAPSE_ATTR: Dict[TColumnHint, str] = {
     "primary_key": "PRIMARY KEY NONCLUSTERED NOT ENFORCED",
-    "unique": "UNIQUE NOT ENFORCED"
+    "unique": "UNIQUE NOT ENFORCED",
 }
 
 
 class SynapseClient(MsSqlClient, SupportsStagingDestination):
     capabilities: ClassVar[DestinationCapabilitiesContext] = capabilities()
 
-    def __init__(self, schema: Schema, config: SynapseClientConfiguration) -> None:   
+    def __init__(self, schema: Schema, config: SynapseClientConfiguration) -> None:
         sql_client = SynapseSqlClient(config.normalize_dataset_name(schema), config.credentials)
         InsertValuesJobClient.__init__(self, schema, config, sql_client)
         self.config: SynapseClientConfiguration = config
@@ -37,8 +37,8 @@ class SynapseClient(MsSqlClient, SupportsStagingDestination):
 
         self.active_hints = deepcopy(HINT_TO_SYNAPSE_ATTR)
         if not self.config.create_indexes:
-            self.active_hints.pop('primary_key', None)
-            self.active_hints.pop('unique', None)
+            self.active_hints.pop("primary_key", None)
+            self.active_hints.pop("unique", None)
 
     def _get_table_update_sql(
         self, table_name: str, new_columns: Sequence[TColumnSchema], generate_alter: bool
@@ -56,14 +56,14 @@ class SynapseClient(MsSqlClient, SupportsStagingDestination):
         else:
             sql_result = _sql_result
         return sql_result
-    
+
     def _create_replace_followup_jobs(
         self, table_chain: Sequence[TTableSchema]
     ) -> List[NewLoadJob]:
         if self.config.replace_strategy == "staging-optimized":
             return [SynapseStagingCopyJob.from_table_chain(table_chain, self.sql_client)]
-        return super()._create_replace_followup_jobs(table_chain)    
-    
+        return super()._create_replace_followup_jobs(table_chain)
+
 
 class SynapseStagingCopyJob(SqlStagingCopyJob):
     @classmethod
@@ -88,9 +88,9 @@ class SynapseStagingCopyJob(SqlStagingCopyJob):
             # recreate staging table
             sql.append(
                 f"CREATE TABLE {staging_table_name}"
-                " WITH ( DISTRIBUTION = ROUND_ROBIN, HEAP )" # distribution must be explicitly specified with CTAS
+                " WITH ( DISTRIBUTION = ROUND_ROBIN, HEAP )"  # distribution must be explicitly specified with CTAS
                 f" AS SELECT * FROM {table_name}"
-                " WHERE 1 = 0;" # no data, table structure only
+                " WHERE 1 = 0;"  # no data, table structure only
             )
-            
-        return sql    
+
+        return sql

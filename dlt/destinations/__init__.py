@@ -26,5 +26,5 @@ __all__ = [
     "qdrant",
     "motherduck",
     "weaviate",
-    "synapse"
+    "synapse",
 ]

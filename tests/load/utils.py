@@ -192,11 +192,8 @@ def destinations_configs(
         ]
         # dbt for Synapse has some complications and I couldn't get it to pass all tests.
         destination_configs += [
-            DestinationTestConfiguration(
-                destination="synapse",
-                supports_dbt=False
-            )
-        ]        
+            DestinationTestConfiguration(destination="synapse", supports_dbt=False)
+        ]
 
     if default_vector_configs:
         # for now only weaviate
