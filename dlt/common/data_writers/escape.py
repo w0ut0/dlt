@@ -98,9 +98,14 @@ def escape_mssql_literal(v: Any) -> Any:
             json.dumps(v), prefix="N'", escape_dict=MS_SQL_ESCAPE_DICT, escape_re=MS_SQL_ESCAPE_RE
         )
     if isinstance(v, bytes):
-        # Use 8000 instead of MAX because using MAX results in an error for
-        # VARBINARY columns with specified length.
-        return f"CONVERT(VARBINARY(8000), '{v.hex()}', 2)"
+        # 8000 is the max value for n in VARBINARY(n)
+        # https://learn.microsoft.com/en-us/sql/t-sql/data-types/binary-and-varbinary-transact-sql
+        if len(v) <= 8000:
+            n = len(v)
+        else:
+            n = "MAX"
+        return f"CONVERT(VARBINARY({n}), '{v.hex()}', 2)"
+
     if isinstance(v, bool):
         return str(int(v))
     if v is None:
