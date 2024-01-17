@@ -1,5 +1,8 @@
+import os
 import pytest
 import sqlfluff
+from copy import deepcopy
+from sqlfluff.api.simple import APIParsingError
 
 from dlt.common.utils import uniq_id
 from dlt.common.schema import Schema
@@ -11,6 +14,7 @@ from dlt.destinations.impl.synapse.configuration import (
 )
 
 from tests.load.utils import TABLE_UPDATE
+from dlt.destinations.impl.synapse.synapse import HINT_TO_SYNAPSE_ATTR
 
 
 @pytest.fixture
@@ -21,13 +25,28 @@ def schema() -> Schema:
 @pytest.fixture
 def client(schema: Schema) -> SynapseClient:
     # return client without opening connection
-    return SynapseClient(
+    client = SynapseClient(
         schema,
         SynapseClientConfiguration(
             dataset_name="test_" + uniq_id(), credentials=SynapseCredentials()
-        ),
+        )
     )
+    assert client.config.create_indexes == False
+    return client    
 
+
+@pytest.fixture
+def client_with_indexes_enabled(schema: Schema) -> SynapseClient:
+    # return client without opening connection
+    client = SynapseClient(
+        schema,
+        SynapseClientConfiguration(
+            dataset_name="test_" + uniq_id(), credentials=SynapseCredentials(),
+            create_indexes = True
+        )
+    )
+    assert client.config.create_indexes == True
+    return client
 
 def test_create_table(client: SynapseClient) -> None:
     # non existing table
@@ -79,3 +98,34 @@ def test_alter_table(client: SynapseClient) -> None:
     assert '"col7_precision" varbinary(19)' in sql
     assert '"col11_precision" time(3)  NOT NULL' in sql
     assert 'WITH ( HEAP )' not in sql
+
+
+@pytest.mark.parametrize("hint", ["primary_key", "unique"])
+def test_create_table_with_column_hint(
+        client: SynapseClient,
+        client_with_indexes_enabled: SynapseClient,
+        hint: str            
+) -> None:
+    attr = HINT_TO_SYNAPSE_ATTR[hint]
+
+    # Case: table without hint.
+    sql = client._get_table_update_sql("event_test_table", TABLE_UPDATE, False)[0]
+    sqlfluff.parse(sql, dialect="tsql")
+    assert f' {attr} ' not in sql
+
+    # Case: table with hint, but client does not have indexes enabled.
+    mod_update = deepcopy(TABLE_UPDATE)
+    mod_update[0][hint] = True
+    sql = client._get_table_update_sql("event_test_table", mod_update, False)[0]
+    sqlfluff.parse(sql, dialect="tsql")
+    assert f' {attr} ' not in sql    
+
+    # Case: table with hint, client has indexes enabled.
+    sql = client_with_indexes_enabled._get_table_update_sql("event_test_table", mod_update, False)[0]
+    # We expect an error because "PRIMARY KEY NONCLUSTERED NOT ENFORCED" and
+    # "UNIQUE NOT ENFORCED" are invalid in the generic "tsql" dialect.
+    # They are however valid in the Synapse variant of the dialect. 
+    with pytest.raises(APIParsingError):
+        sqlfluff.parse(sql, dialect="tsql")
+    assert f'"col1" bigint {attr} NOT NULL' in sql    
+ 

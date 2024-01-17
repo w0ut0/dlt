@@ -27,7 +27,7 @@ class synapse(Destination[SynapseClientConfiguration, "SynapseClient"]):
     def __init__(
         self,
         credentials: t.Union[SynapseCredentials, t.Dict[str, t.Any], str] = None,
-        create_indexes: bool = True,
+        create_indexes: bool = False,
         destination_name: t.Optional[str] = None,
         environment: t.Optional[str] = None,
         **kwargs: t.Any,

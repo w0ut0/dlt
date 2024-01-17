@@ -19,7 +19,10 @@ from dlt.destinations.impl.synapse.sql_client import SynapseSqlClient
 from dlt.destinations.impl.synapse.configuration import SynapseClientConfiguration
 
 
-HINT_TO_SYNAPSE_ATTR: Dict[TColumnHint, str] = {"unique": "UNIQUE NOT ENFORCED"}
+HINT_TO_SYNAPSE_ATTR: Dict[TColumnHint, str] = {
+    "primary_key": "PRIMARY KEY NONCLUSTERED NOT ENFORCED",
+    "unique": "UNIQUE NOT ENFORCED"
+}
 
 
 class SynapseClient(MsSqlClient, SupportsStagingDestination):
@@ -33,7 +36,8 @@ class SynapseClient(MsSqlClient, SupportsStagingDestination):
         self.type_mapper = MsSqlTypeMapper(self.capabilities)
 
         self.active_hints = deepcopy(HINT_TO_SYNAPSE_ATTR)
-        if not self.config.create_unique_indexes:
+        if not self.config.create_indexes:
+            self.active_hints.pop('primary_key', None)
             self.active_hints.pop('unique', None)
 
     def _get_table_update_sql(

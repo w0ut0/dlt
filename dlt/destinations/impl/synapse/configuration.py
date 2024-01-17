@@ -30,9 +30,9 @@ class SynapseClientConfiguration(MsSqlClientConfiguration):
     destination_type: Final[str] = "synapse"  # type: ignore
     credentials: SynapseCredentials
 
-    # Determines if `unique` column hints are applied.
-    # Set to False by default because the UNIQUE constraint is tricky in
-    # Synapse: it is NOT ENFORCED and can lead to innacurate results if the
-    # user does not ensure all column values are unique.
+    # Determines if `primary_key` and `unique` column hints are applied.
+    # Set to False by default because the PRIMARY KEY and UNIQUE constraints
+    # are tricky in Synapse: they are NOT ENFORCED and can lead to innacurate
+    # results if the user does not ensure all column values are unique.
     # https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-table-constraints
-    create_unique_indexes: bool = False
+    create_indexes: bool = False

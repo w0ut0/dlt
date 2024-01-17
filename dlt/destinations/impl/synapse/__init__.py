@@ -27,7 +27,7 @@ def capabilities() -> DestinationCapabilitiesContext:
     caps.max_column_identifier_length = 128
     
     # https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-service-capacity-limits#queries
-    caps.max_query_length = 65,536 * 4096
+    caps.max_query_length = 65536 * 4096
     caps.is_max_query_length_in_bytes = True
 
     # nvarchar(max) can store 2 GB
