@@ -86,6 +86,9 @@ class SynapseStagingCopyJob(SqlStagingCopyJob):
                 f" {staging_table_name};"
             )
             # recreate staging table
+            # In some cases, when multiple instances of this CTAS query are
+            # executed concurrently, Synapse suspends the queries and hangs.
+            # This can be prevented by setting the env var LOAD__WORKERS = "1".
             sql.append(
                 f"CREATE TABLE {staging_table_name}"
                 " WITH ( DISTRIBUTION = ROUND_ROBIN, HEAP )"  # distribution must be explicitly specified with CTAS
