@@ -1,5 +1,9 @@
 # Create new destination
 
+:::caution
+This guide is compatible with `dlt` **0.3.x**. Version **0.4.x** has a different module layout. We are working on an update.
+:::
+
 `dlt` can import destinations from external python modules. Below we show how to quickly add a [dbapi](https://peps.python.org/pep-0249/) based destination. `dbapi` is a standardized interface to access
 databases in Python. If you used ie. postgres (ie. `psycopg2`) you are already familiar with it.
 
@@ -73,7 +77,7 @@ The default `escape_identifier` function identifier escapes `"` and '\' and quot
 
 You should avoid providing a custom `escape_literal` function by not enabling `insert-values` for your destination.
 
-## 4. Adjust the sql client
+## 4. Adjust the SQL client
 **sql client** is a wrapper over `dbapi` and its main role is to provide consistent interface for executing SQL statements, managing transactions and (probably the most important) to help handling errors via classifying exceptions. Here's a few things you should pay attention to:
 
 - When opening the connection: add current dataset name to search path, set session timezone to UTC.
