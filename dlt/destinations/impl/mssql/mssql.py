@@ -186,6 +186,4 @@ class MsSqlClient(InsertValuesJobClient):
     def _from_db_type(
         self, pq_t: str, precision: Optional[int], scale: Optional[int]
     ) -> TColumnType:
-        # if pq_t == 'smallint':
-        #     precision = 16
         return self.type_mapper.from_db_type(pq_t, precision, scale)
