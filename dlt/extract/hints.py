@@ -5,7 +5,6 @@ from dlt.common.schema.utils import DEFAULT_WRITE_DISPOSITION, merge_columns, ne
 from dlt.common.schema.typing import (
     TColumnNames,
     TColumnProp,
-    TColumnSchema,
     TPartialTableSchema,
     TTableSchema,
     TTableSchemaColumns,
@@ -23,7 +22,6 @@ from dlt.extract.typing import TFunHintTemplate, TTableHintTemplate, ValidateIte
 from dlt.extract.exceptions import (
     DataItemRequiredForDynamicTableHints,
     InconsistentTableTemplate,
-    TableNameMissing,
 )
 from dlt.extract.utils import ensure_table_schema_columns, ensure_table_schema_columns_hint
 from dlt.extract.validation import create_item_validator

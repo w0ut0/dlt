@@ -111,6 +111,7 @@ class TColumnSchema(TColumnSchemaBase, total=False):
     root_key: Optional[bool]
     merge_key: Optional[bool]
     variant: Optional[bool]
+    classifiers: Optional[List[str]]
 
 
 TTableSchemaColumns = Dict[str, TColumnSchema]

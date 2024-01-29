@@ -391,7 +391,7 @@ WHERE """
         return schema_update
 
     def _build_schema_update_sql(
-        self, only_tables: Iterable[str]
+        self, only_tables: Iterable[str] = None, full_create: bool = False
     ) -> Tuple[List[str], TSchemaTables]:
         """Generates CREATE/ALTER sql for tables that differ between the destination and in client's Schema.
 
@@ -409,6 +409,10 @@ WHERE """
         for table_name in only_tables or self.schema.tables:
             exists, storage_table = self.get_storage_table(table_name)
             new_columns = self._create_table_update(table_name, storage_table)
+            # force full table ddl commands if requested
+            if full_create:
+                new_columns = list(storage_table.values())
+                exists = False
             if len(new_columns) > 0:
                 # build and add sql to execute
                 sql_statements = self._get_table_update_sql(table_name, new_columns, exists)
