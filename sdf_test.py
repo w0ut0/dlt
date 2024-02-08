@@ -18,3 +18,6 @@ def resource():
 
 p = dlt.pipeline("sdf_test", destination="duckdb")
 p.run(resource())
+
+# dlt pipeline sdf_test schema --format sql
+# dlt pipeline sdf_test schema --format sdf
