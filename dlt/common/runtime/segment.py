@@ -25,7 +25,7 @@ _THREAD_POOL: ManagedThreadPool = ManagedThreadPool(1)
 _SESSION: requests.Session = None
 _WRITE_KEY: str = None
 _SEGMENT_REQUEST_TIMEOUT = (1.0, 1.0)  # short connect & send timeouts
-_SEGMENT_ENDPOINT = "https://api.segment.io/v1/track"
+_SEGMENT_ENDPOINT: str = None
 _SEGMENT_CONTEXT: TExecutionContext = None
 
 
@@ -34,8 +34,12 @@ def init_segment(config: RunConfiguration) -> None:
         config.dlthub_telemetry_segment_write_key
     ), "dlthub_telemetry_segment_write_key not present in RunConfiguration"
 
+    assert (
+        config.dlthub_telemetry_segment_endpoint_url
+    ), "dlthub_telemetry_segment_endpoint_url not present in RunConfiguration"
+
     # create thread pool to send telemetry to segment
-    global _WRITE_KEY, _SESSION
+    global _WRITE_KEY, _SESSION, _SEGMENT_ENDPOINT
     if not _SESSION:
         _SESSION = requests.Session()
         # flush pool on exit
@@ -43,6 +47,7 @@ def init_segment(config: RunConfiguration) -> None:
     # store write key
     key_bytes = (config.dlthub_telemetry_segment_write_key + ":").encode("ascii")
     _WRITE_KEY = base64.b64encode(key_bytes).decode("utf-8")
+    _SEGMENT_ENDPOINT = config.dlthub_telemetry_segment_endpoint_url
     # cache the segment context
     _default_context_fields()
 
@@ -182,6 +187,7 @@ def _send_event(event_name: str, properties: StrAny, context: StrAny) -> None:
     def _future_send() -> None:
         # import time
         # start_ts = time.time()
+        print(payload)
         resp = _SESSION.post(
             _SEGMENT_ENDPOINT, headers=headers, json=payload, timeout=_SEGMENT_REQUEST_TIMEOUT
         )

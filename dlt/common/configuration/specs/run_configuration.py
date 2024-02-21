@@ -15,6 +15,9 @@ class RunConfiguration(BaseConfiguration):
     sentry_dsn: Optional[str] = None  # keep None to disable Sentry
     slack_incoming_hook: Optional[TSecretStrValue] = None
     dlthub_telemetry: bool = True  # enable or disable dlthub telemetry
+    dlthub_telemetry_segment_endpoint_url: str = (
+        "https://europe-west3-dlthub-analytics.cloudfunctions.net/telemetry-requests"
+    )
     dlthub_telemetry_segment_write_key: str = "a1F2gc6cNYw2plyAt02sZouZcsRjG7TD"
     log_format: str = "{asctime}|[{levelname:<21}]|{process}|{thread}|{name}|{filename}|{funcName}:{lineno}|{message}"
     log_level: str = "WARNING"
