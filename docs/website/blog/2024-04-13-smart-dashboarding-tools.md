@@ -7,7 +7,7 @@ authors:
   title: Data Science intern at dltHub
   url: https://github.com/hibajamal
   image_url: https://avatars.githubusercontent.com/u/35984866?v=4
-tags: [dashboarding tools, LLMs, AI driven analytics]
+tags: [dashboarding, LLMs, AI driven analytics]
 ---
 
 <aside>
