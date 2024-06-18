@@ -344,7 +344,6 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
         max_items: Optional[int] = None,
         max_time: Optional[float] = None,
         min_wait: Optional[float] = None,
-        min_wait_strategy: Literal["before", "after"] = "before",
     ) -> TDltResourceImpl:  # noqa: A003
         """Adds a limit `max_items` to the resource pipe
 
@@ -355,8 +354,6 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
             max_items (int): The maximum number of items to yield, set to None for no limit
             max_time (float): The maximum number of seconds for this generator to run after it was opened, set to None for no limit
             min_wait (float): The minimum number of seconds to wait between iterations (usedful for rate limiting)
-            min_wait_strategy(Literal["before", "after"]): From when to count the wait time, before counts from the time the last iterator run was started, after from the time
-            the last iterator run completed
         Returns:
             "DltResource": returns self
         """
@@ -367,6 +364,14 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
 
         def _gen_wrap(gen: TPipeStep) -> TPipeStep:
             """Wrap a generator to take the first `max_items` records"""
+
+            if max_items >= 0 or max_time and not self.incremental:
+                from dlt.common import logger
+
+                logger.warning(
+                    f"You have added a max_items or max_time limit to resource {self.name}, but no"
+                    " incremental was declared."
+                )
 
             # zero items should produce empty generator
             if max_items == 0:
@@ -389,7 +394,7 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
             try:
                 for i in gen:  # type: ignore # TODO: help me fix this later
                     # remember last iteration for "after" setting
-                    if min_wait and min_wait_strategy == "after":
+                    if min_wait:
                         last_iteration = time.time()
 
                     # return item to caller
@@ -415,7 +420,7 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
                             time.sleep(0.1)
 
                     # remember last iteration for "before" setting
-                    if min_wait and min_wait_strategy == "before":
+                    if min_wait:
                         last_iteration = time.time()
 
             finally:
