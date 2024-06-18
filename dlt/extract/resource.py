@@ -379,7 +379,7 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
 
             # vars needed for max time and rate limiting
             start_time: float = time.time()
-            last_iteration: float = 0
+            last_iteration: float = start_time
 
             count = 0
             is_async_gen = False
@@ -393,10 +393,6 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
 
             try:
                 for i in gen:  # type: ignore # TODO: help me fix this later
-                    # remember last iteration for "after" setting
-                    if min_wait:
-                        last_iteration = time.time()
-
                     # return item to caller
                     yield i
 
@@ -419,7 +415,7 @@ class DltResource(Iterable[TDataItem], DltResourceHints):
                             yield None
                             time.sleep(0.1)
 
-                    # remember last iteration for "before" setting
+                    # remember last iteration time
                     if min_wait:
                         last_iteration = time.time()
 
