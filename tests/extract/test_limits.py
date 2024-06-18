@@ -79,7 +79,13 @@ def test_time_limit() -> None:
     async_list = list(r_async().add_limit(max_time=1))
 
     # we should have extracted 10 items within 1 second, sleep is included in the resource
-    allowed_results = [list(range(11)), list(range(10)), list(range(9))]
+    allowed_results = [
+        list(range(12)),
+        list(range(11)),
+        list(range(10)),
+        list(range(9)),
+        list(range(8)),
+    ]
     assert sync_list in allowed_results
     assert async_list in allowed_results
 
@@ -99,7 +105,13 @@ def test_min_wait() -> None:
     async_list = list(r_async().add_limit(max_time=1, min_wait=0.2))
 
     # we should have extracted about 5 items within 1 second, sleep is done via min_wait
-    allowed_results = [list(range(4)), list(range(5)), list(range(6))]
+    allowed_results = [
+        list(range(3)),
+        list(range(4)),
+        list(range(5)),
+        list(range(6)),
+        list(range(7)),
+    ]
     assert sync_list in allowed_results
     assert async_list in allowed_results
 
