@@ -1,6 +1,7 @@
 ---
 slug: how-dlt-uses-apache-arrow
 title: "How dlt uses Apache Arrow"
+image:  https://storage.googleapis.com/dlt-blog-images/blog_data_engineering_with_jorrit.png
 authors:
   name: Jorrit Sandbrink
   title: Open Source Software Engineer
@@ -111,7 +112,7 @@ per destination.
 
 The user decides which route is taken. It’s an implicit choice that depends on the type of object
 yielded by the resource.
-![Picture](https://storage.googleapis.com/dlt-blog-images/blog_data_engineering_with_jorrit.png)
+![two pathways](https://storage.googleapis.com/dlt-blog-images/blog_data_engineering_with_jorrit.png)
 
 ## Traditional route
 
