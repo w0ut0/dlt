@@ -36,6 +36,7 @@ from dlt.common.configuration.specs.base_configuration import extract_inner_hint
 from dlt.common.destination.utils import verify_schema_capabilities
 from dlt.common.exceptions import TerminalValueError
 from dlt.common.normalizers.naming import NamingConvention
+from dlt.common.schema.typing import TTableSchemaColumns
 
 from dlt.common.schema import Schema, TTableSchema, TSchemaTables
 from dlt.common.schema.utils import (
@@ -411,7 +412,9 @@ class HasFollowupJobs:
 class SupportsReadableRelation(Protocol):
     """A readable relation retrieved from a destination that supports it"""
 
-    def df(self, chunk_size: int = None) -> Optional[DataFrame]:
+    def df(
+        self, chunk_size: int = None, columns: TTableSchemaColumns = None
+    ) -> Optional[DataFrame]:
         """Fetches the results as data frame. For large queries the results may be chunked
 
         Fetches the results into a data frame. The default implementation uses helpers in `pandas.io.sql` to generate Pandas data frame.
@@ -427,11 +430,17 @@ class SupportsReadableRelation(Protocol):
         """
         ...
 
-    def arrow(self, chunk_size: int = None) -> Optional[ArrowTable]: ...
+    def arrow(
+        self, chunk_size: int = None, columns: TTableSchemaColumns = None
+    ) -> Optional[ArrowTable]: ...
 
-    def iter_df(self, chunk_size: int) -> Generator[DataFrame, None, None]: ...
+    def iter_df(
+        self, chunk_size: int, columns: TTableSchemaColumns = None
+    ) -> Generator[DataFrame, None, None]: ...
 
-    def iter_arrow(self, chunk_size: int) -> Generator[ArrowTable, None, None]: ...
+    def iter_arrow(
+        self, chunk_size: int, columns: TTableSchemaColumns = None
+    ) -> Generator[ArrowTable, None, None]: ...
 
     def fetchall(self) -> List[Tuple[Any, ...]]: ...
 
@@ -445,7 +454,7 @@ class SupportsReadableRelation(Protocol):
 class SupportsReadableDataset(Protocol):
     """A readable dataset retrieved from a destination, has support for creating readable relations for a query or table"""
 
-    def query(self, sql: str) -> SupportsReadableRelation: ...
+    def query(self, query: str) -> SupportsReadableRelation: ...
 
     def __getitem__(self, table: str) -> SupportsReadableRelation: ...
 
@@ -621,11 +630,17 @@ class WithReadableRelations(ABC):
     """Add support for getting readable reletions form a destination"""
 
     @abstractmethod
-    def get_readable_relation(
+    def table_relation(
         self,
         *,
         table: str = None,
-        sql: str = None,
+    ) -> ContextManager[SupportsReadableRelation]: ...
+
+    @abstractmethod
+    def query_relation(
+        self,
+        *,
+        query: str = None,
     ) -> ContextManager[SupportsReadableRelation]: ...
 
 
