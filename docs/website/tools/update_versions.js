@@ -52,7 +52,7 @@ for (const version of VERSIONS) {
 
     // build doc version, we also run preprocessing and markdown gen for each doc version
     console.log(`Building docs...`)
-    proc.execSync(`cd ${REPO_DOCS_DIR} && node tools/preprocess_docs.js && PYTHONPATH=. poetry run pydoc-markdown`)
+    proc.execSync(`cd ${REPO_DOCS_DIR} && npm run preprocess-docs && npm run generate-api-reference`)
 
     console.log(`Snapshotting version...`)
     proc.execSync(`cd ${REPO_DOCS_DIR} && npm run docusaurus docs:version ${version}`)
