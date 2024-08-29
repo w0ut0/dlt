@@ -13,9 +13,16 @@ VERSIONED_SIDEBARS_FOLDER = "versioned_sidebars"
 // no doc versions below this version will be deployed
 MINIMUM_SEMVER_VERSION = "0.4.0"
 
+// clear old repo version
+fs.rmSync(REPO_DIR, { recursive: true, force: true })
+
+// checkout fresh
+console.log("Checking out dlt repo")
+proc.execSync(`git clone ${REPO_URL} ${REPO_DIR}`)
+
 // find tags
 console.log("Discovering versions")
-const tags = proc.execSync(`git tag`).toString().trim().split("\n");
+const tags = proc.execSync(`cd ${REPO_DIR} && git tag`).toString().trim().split("\n");
 console.log(`Found ${tags.length} tags`)
 
 // parse and filter invalid tags
@@ -53,13 +60,6 @@ fs.rmSync("versions.json", { force: true })
 
 fs.mkdirSync(VERSIONED_DOCS_FOLDER);
 fs.mkdirSync(VERSIONED_SIDEBARS_FOLDER);
-
-// clear old repo version
-fs.rmSync(REPO_DIR, { recursive: true, force: true })
-
-// checkout fresh
-console.log("Checking out dlt repo")
-proc.execSync(`git clone ${REPO_URL} ${REPO_DIR}`)
 
 // check that checked out repo is on devel
 console.log("Checking branch")
