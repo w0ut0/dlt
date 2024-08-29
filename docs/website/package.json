@@ -13,7 +13,9 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "preprocess-docs": "node tools/preprocess_docs.js",
-    "generate-api-reference": "PYTHONPATH=. poetry run pydoc-markdown"
+    "generate-api-reference": "PYTHONPATH=. poetry run pydoc-markdown",
+    "clear-versions": "node tools/clear_versions.js",
+    "update-versions": "node tools/update_versions.js"
   },
   "dependencies": {
     "@docusaurus/core": "2.4.3",
