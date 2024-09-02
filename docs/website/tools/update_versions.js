@@ -42,7 +42,7 @@ if (versions.length < 5) {
 }
 
 // go through the versions and find all newest versions of minor versions
-const selectedVersions = [versions[0]];
+const selectedVersions = ["master"];
 let lastVersion = versions[0];
 for (let ver of versions) {
     if (semver.minor(ver) != semver.minor(lastVersion) || semver.major(ver) != semver.major(lastVersion)) {
@@ -76,11 +76,12 @@ for (const version of selectedVersions) {
     // checkout verison and verify we have the right tag
     console.log(`Generating version ${version}, switching to tag:`)
     proc.execSync(`cd ${REPO_DIR} && git checkout ${version}`)
-    const tag = proc.execSync(`cd ${REPO_DIR} && git describe --exact-match --tags`).toString().trim()
-    if (tag != version) {
-        console.error(`Could not checkout version ${version}`)
-        process.exit(1)
-    }
+
+    // const tag = proc.execSync(`cd ${REPO_DIR} && git describe --exact-match --tags`).toString().trim()
+    // if (tag != version) {
+    //     console.error(`Could not checkout version ${version}`)
+    //     process.exit(1)
+    // }
 
     // build doc version, we also run preprocessing and markdown gen for each doc version
     console.log(`Building docs...`)

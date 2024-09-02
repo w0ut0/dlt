@@ -1,10 +1,25 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
+const fs = require("fs")
 require('dotenv').config()
 
 const lightCodeTheme = require('prism-react-renderer/themes/dracula');
 // const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+
+// create versions config
+const versions = {"current": {
+  label: 'devel', 
+  path: 'devel'
+}}
+
+// inject master version renaming only if versions present
+if (fs.existsSync("versions.json")) {
+  versions["master"] = {
+    label: process.env.DOCUSAURUS_DLT_VERSION || "latest",
+    path: '/'
+  }
+}
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -30,8 +45,6 @@ const config = {
     locales: ['en'],
   },
 
-
-
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -50,12 +63,7 @@ const config = {
           editUrl: (params) => {
             return "https://github.com/dlt-hub/dlt/tree/devel/docs/website/docs/" + params.docPath;
           },
-          versions: {
-            current: {
-              label: 'devel',
-              path: 'devel'
-            },
-          },
+          versions: versions,
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
         },
@@ -197,16 +205,5 @@ const config = {
     },
   ],
 };
-
-if (!process.env.IS_MASTER_BRANCH && config.themeConfig) {
-  config.themeConfig.announcementBar = {
-    id: 'devel docs',
-    content:
-      'This is the development version of the dlt docs. <a target="_blank" rel="noopener noreferrer" href="https://dlthub.com/docs/intro">Go to the stable docs.</a>',
-    backgroundColor: '#4c4898',
-    textColor: '#fff',
-    isCloseable: false,
-  }
-}
 
 module.exports = config;
