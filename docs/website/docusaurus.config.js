@@ -10,7 +10,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 // create versions config
 const versions = {"current": {
   label: 'devel', 
-  path: 'devel'
+  path: 'devel',
+  noIndex: true
 }}
 
 // inject master version renaming only if versions present
@@ -19,6 +20,16 @@ if (fs.existsSync("versions.json")) {
     label: process.env.DOCUSAURUS_DLT_VERSION || "latest",
     path: '/'
   }
+  // disable indexing for all known versions
+  for (let v of JSON.parse(fs.readFileSync("versions.json"))) {
+    if (v == "master") {
+      continue;
+    }
+    versions[v] = {
+      noIndex: true
+    }
+  }
+
 }
 
 /** @type {import('@docusaurus/types').Config} */
