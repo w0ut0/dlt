@@ -1,3 +1,5 @@
+# flake8: noqa
+
 from typing import Any
 
 import dlt
@@ -102,7 +104,7 @@ def load_github() -> None:
     )
 
     load_info = pipeline.run(github_source())
-    print(load_info)  # noqa: T201
+    print(load_info)
 
 
 def load_pokemon() -> None:
@@ -145,7 +147,7 @@ def load_pokemon() -> None:
     check_network_and_authentication()
 
     load_info = pipeline.run(pokemon_source)
-    print(load_info)  # noqa: T201
+    print(load_info)
 
 
 if __name__ == "__main__":

@@ -324,6 +324,7 @@ def init_command(
     remote_index: TVerifiedSourceFileIndex = None
     sources_module_prefix: str = ""
 
+    remote_modified: Dict[str, TVerifiedSourceFileEntry] = {}
     if source_type == "verified":
         # get pipeline files
         source_configuration = files_ops.get_verified_source_configuration(
