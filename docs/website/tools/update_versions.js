@@ -41,11 +41,11 @@ if (versions.length < 5) {
     process.exit(1)
 }
 
-// go through the versions and find all newest versions of minor versions
+// go through the versions and find all newest versions of any major version
 const selectedVersions = ["master"];
 let lastVersion = versions[0];
 for (let ver of versions) {
-    if (semver.minor(ver) != semver.minor(lastVersion) || semver.major(ver) != semver.major(lastVersion)) {
+    if ( semver.major(ver) != semver.major(lastVersion)) {
         selectedVersions.push(ver)
     }
     lastVersion = ver;
@@ -65,6 +65,7 @@ fs.mkdirSync(VERSIONED_SIDEBARS_FOLDER);
 console.log("Checking branch")
 const branch = proc.execSync(`cd ${REPO_DIR} && git rev-parse --abbrev-ref HEAD`).toString().trim()
 
+// sanity check
 if (branch != "devel") {
     console.error("Could not check out devel branch")
     process.exit(1)

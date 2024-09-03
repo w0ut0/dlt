@@ -16,8 +16,14 @@ const versions = {"current": {
 
 // inject master version renaming only if versions present
 if (fs.existsSync("versions.json")) {
+  let latestLabel = "latest"
+  if (process.env.DOCUSAURUS_DLT_VERSION) {
+    latestLabel = `${process.env.DOCUSAURUS_DLT_VERSION} (latest)`
+  }
+
+
   versions["master"] = {
-    label: process.env.DOCUSAURUS_DLT_VERSION || "latest",
+    label: latestLabel,
     path: '/'
   }
   // disable indexing for all known versions
